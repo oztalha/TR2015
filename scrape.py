@@ -24,8 +24,8 @@ for i in range(1,int(len(data)/7)):
     i = 7*i
     try:
         if data[i].text[0].isalpha(): 
-            province = [data[i].text] # province name
-            city = data[i].text
+            city = data[i].text.strip()
+            province = [city] # province name
         else:
             province = [' '.join([city,data[i].text])]
         for j in range(2,7): # party shares
