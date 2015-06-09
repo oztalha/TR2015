@@ -49,3 +49,17 @@ for p in parties:
     ax.set_title(p+' 2015 vs 2011 Vote Shares',fontsize=18,x=0.5, y=0.95)
     ax.plot([0,1],[0,1], transform=plt.gca().transAxes);
     plt.savefig('charts/'+p+'.PNG',bbox_inches='tight')
+    
+#plotly graphs
+import plotly.plotly as py
+from plotly.graph_objs import *
+for p in parties:
+    p11 = p + 'P11'
+    lim = max(df[p].max(),df[p11].max()) + 5
+    data = Data([Scatter(x=df[p11],y=df[p])])
+    layout = Layout(title=p+' 2015 vs 2011 Vote Shares',
+                    autosize=True,
+                    xaxis=XAxis(title=p+" 2011 Vote Shares"),
+                    yaxis=YAxis(title=p+" 2015 Vote Shares"))
+    fig = Figure(data=data,layout=layout)
+    py.iplot(fig)
