@@ -1,24 +1,23 @@
 ---
-title: "TR General Elections Vote Shifts"
+title: "TR General Elections Vote Transitions 2011-2015"
 author: "Talha Oz"
 date: "June 9, 2015"
 output: html_document
 ---
 
-Estimate the vote shifts using ecological inference:
+Estimate the vote transitions using a recursive method developed by [Andreadis](http://www.tandfonline.com/doi/abs/10.1080/17457280902799089) (An R script and the [instructions](http://www.polres.gr/en/vtr) are also made available):
 
-```{r}
-library(ei)
-library("eco")
-data = read.csv('data/TR_11_15.csv',stringsAsFactors=FALSE)
-res.ei<-ei(cbind(AKP, CHP, MHP, HDP, OTHERS)~cbind(AKPP11,CHPP11,MHPP11,HDPP11,OTHERS11),data=data,total=data$VALID11)
-res.BD<-ecoBD(cbind(AKP, CHP, MHP, HDP, OTHERS)~AKPP11+CHPP11+MHPP11+HDPP11+OTHERS11,N=VALID11,data=data)
+```{r, results="hide"}
+source('VTR.R')
+mydata <- read.csv("data/TR_11_15.csv")
+myN <- mydata[7]
+myT <- mydata[2:6]
+myX <- mydata[8:12]
+z<-multirate(myN,myX,myT,0.001);
+write.csv(z$Bb, file="data/TransitionRates.csv")
 ```
-
-You can also embed plots, for example:
-
+And here is the result:
 ```{r, echo=FALSE}
-plot(cars)
+z$Bb
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Party names not succeeded with a year are 2015 results. So this vote transition algorithm thinks that 3.2% of CHP11 votes moved to HDP in the 2015 elections.
