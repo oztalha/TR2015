@@ -1,0 +1,24 @@
+---
+title: "TR General Elections Vote Shifts"
+author: "Talha Oz"
+date: "June 9, 2015"
+output: html_document
+---
+
+Estimate the vote shifts using ecological inference:
+
+```{r}
+library(ei)
+library("eco")
+data = read.csv('data/TR_11_15.csv',stringsAsFactors=FALSE)
+res.ei<-ei(cbind(AKP, CHP, MHP, HDP, OTHERS)~cbind(AKPP11,CHPP11,MHPP11,HDPP11,OTHERS11),data=data,total=data$VALID11)
+res.BD<-ecoBD(cbind(AKP, CHP, MHP, HDP, OTHERS)~AKPP11+CHPP11+MHPP11+HDPP11+OTHERS11,N=VALID11,data=data)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
