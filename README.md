@@ -1,6 +1,6 @@
 # Turkish General Elections 2015
 
-Collects and analyzes election results.
+Collects and analyzes election results. Visit my blog [post](http://talhaoz.com/?p=735) to read more about the project.
 
 ## Data Collection
   - **scrape.py** : Scrapes province level vote shares from [Yenisafak](http://www.yenisafak.com.tr/secim-2015/secim-sonuclari) website
