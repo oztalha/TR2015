@@ -8,5 +8,5 @@ Collects and analyzes election results. Visit my blog [post](http://talhaoz.com/
   - **TEPLWeb.csv** : A great [dataset](http://www.luc.edu/faculty/gtezcur/data.html) of past Turkish elections by Gunes Murat Tezcur
 
 ## Analysis
-  - **analyze.py** : Plots 2011 vs 2015 vote shares for each party
-  - **VoteShifts.Rmd** : Simply calls the `multirate` function in `VTR.R` script developed by [Andreadis](http://www.polres.gr/en/vtr) and creates a contingency table of vote transitions: outputs `data/TransitionRates.csv` (note that these values are before they normalized by parties' actual vote shares in '11). Absolute vote share transitions is in `data/TransitionRates.csv`
+  - **analyze.py** : Plots 2011 vs 2015 vote shares for each party (`charts/*.PNG`) and outputs `data/TR_11_15.csv`
+  - **VoteShifts.Rmd** : Simply calls the `multirate` function in `VTR.R` script developed by [Andreadis](http://www.polres.gr/en/vtr) and creates a contingency table of vote transitions: outputs `data/TransitionRates.csv` (note that these values are before they normalized by parties' actual vote shares in '11). Absolute vote share transitions is in `data/Transitions.csv`
