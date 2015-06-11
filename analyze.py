@@ -56,10 +56,37 @@ from plotly.graph_objs import *
 for p in parties:
     p11 = p + 'P11'
     lim = max(df[p].max(),df[p11].max()) + 5
-    data = Data([Scatter(x=df[p11],y=df[p])])
+    data = Data([Scatter(x=df[p11],y=df[p],mode='markers',
+                         text=df['PROVINCE'])])
     layout = Layout(title=p+' 2015 vs 2011 Vote Shares',
                     autosize=True,
                     xaxis=XAxis(title=p+" 2011 Vote Shares"),
                     yaxis=YAxis(title=p+" 2015 Vote Shares"))
     fig = Figure(data=data,layout=layout)
-    py.iplot(fig)
+    py.iplot(fig,fileopt='new')
+    
+    
+
+# ilce level analysis: outputs TR_11_15_ilce.csv
+df11 = pd.read_csv('data/genel_secim_oylar.csv')
+df11 = df11[df11['yil']==2011]
+df15 = pd.read_csv('data/TR2015_ILCELER.csv')
+plaka = pd.read_table('data/plaka.tsv',header=None,names=['il','kod'])
+# fix non-matching city and party names
+# df15[~df15['il'].isin(plaka['il'])]['il'].unique()
+plaka = plaka.replace('İçel','Mersin')
+plaka = plaka.replace('Afyon','Afyonkarahisar')
+kodil = dict(zip(plaka.kod, plaka.il))
+df15 = df15.replace('K.Maraş','Kahramanmaraş')
+df15 = df15.merge(plaka)
+df11 = df11.replace('Ak Parti','AKP')
+df11 = df11.apply(lambda x: x.replace('Merkez',kodil[x.il]),axis=1)
+df11 = df11.replace('Didim (Yenihisar)','Didim')
+df11 = df11.replace('Devrakani','Devrekani')
+df15 = df15.replace('19.May','19 Mayıs')
+df11[~df11['ilce'].isin(df15['ilce'])]['ilce'].unique()
+df15[~df15['ilce'].isin(df12['ilce'])]['ilce'].unique()
+df11 = df11.rename(columns={'il':'kod'})
+dfilce = df11.merge(df15, on=['kod','ilce'])
+
+
