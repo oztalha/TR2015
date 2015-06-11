@@ -68,6 +68,7 @@ for p in parties:
     
 
 # ilce level analysis: outputs TR_11_15_ilce.csv
+# https://github.com/mertnuhoglu/secim_verileri/blob/master/data/memurlarnet/genel/collected/genel_secim_oylar.csv
 df11 = pd.read_csv('data/genel_secim_oylar.csv')
 df11 = df11[df11['yil']==2011]
 df15 = pd.read_csv('data/TR2015_ILCELER.csv')
@@ -79,14 +80,37 @@ plaka = plaka.replace('Afyon','Afyonkarahisar')
 kodil = dict(zip(plaka.kod, plaka.il))
 df15 = df15.replace('K.Maraş','Kahramanmaraş')
 df15 = df15.merge(plaka)
-df11 = df11.replace('Ak Parti','AKP')
+df11 = df11.replace('AK Parti','AKP')
 df11 = df11.apply(lambda x: x.replace('Merkez',kodil[x.il]),axis=1)
 df11 = df11.replace('Didim (Yenihisar)','Didim')
 df11 = df11.replace('Devrakani','Devrekani')
+df11 = df11.replace('Aydın','Efeler')
+df11 = df11.replace('Denizli','Merkezefendi')
+df11 = df11.replace('Mardin','Artuklu')
+df11 = df11.replace('Aydınlar','Tillo')
+df11 = df11.replace('Trabzon','Ortahisar')
+df11 = df11.replace('Akköy','Pamukkale')
+df11 = df11.replace('Ordu','Altınordu')
+df11 = df11.replace('Bahşılı','Bahşili')
 df15 = df15.replace('19.May','19 Mayıs')
 df11[~df11['ilce'].isin(df15['ilce'])]['ilce'].unique()
-df15[~df15['ilce'].isin(df12['ilce'])]['ilce'].unique()
+df15[~df15['ilce'].isin(df11['ilce'])]['ilce'].unique()
 df11 = df11.rename(columns={'il':'kod'})
-dfilce = df11.merge(df15, on=['kod','ilce'])
+df11 = df11.replace('BĞMZ','HDP')
+grouped = df11.groupby(by=['kod','ilce'])
+df11 = grouped.apply(getVoteShares).reset_index()
+dfilce = df11.merge(df15, on=['kod','ilce'],suffixes=('11','15'))
+dfilce.to_csv('data/TR_11_15_ilce.csv',index=False)
 
 
+def getVoteShares(g):
+    oy = g.Oy.sum()
+    AKP = CHP = MHP = HDP = fourSum = 0
+    share = {'AKP':0,'CHP':0,'MHP':0,'HDP':0}
+    for k in share.keys():
+        if g[g.Parti==k].any().any():
+            share[k] = float(g[g.Parti==k]['Oy']) / oy
+            fourSum += int(g[g.Parti==k]['Oy'])
+    share['OTHERS'] = float(oy - fourSum) / oy
+    share['VOTES11'] = oy
+    return pd.Series(share)
