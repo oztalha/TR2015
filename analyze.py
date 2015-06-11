@@ -85,9 +85,7 @@ df11 = df11.replace('AK Parti','AKP')
 df11 = df11.replace('BĞMZ','HDP')
 df11 = df11.rename(columns={'il':'kod'})
 
-# fix non-matching ilce names
-df11[~df11['ilce'].isin(df15['ilce'])]['ilce'].unique()
-df15[~df15['ilce'].isin(df11['ilce'])]['ilce'].unique()
+# 2011 ile 2015 arasinda ismi degisen ilceler
 df11 = df11.apply(lambda x: x.replace('Merkez',kodil[x.il]),axis=1)
 df11 = df11.replace('Didim (Yenihisar)','Didim')
 df11 = df11.replace('Devrakani','Devrekani')
@@ -104,6 +102,7 @@ df11 = df11.replace('Samandağı','Samandağ')
 df11 = df11.replace('Muğla','Menteşe')
 df15 = df15.replace('19.May','19 Mayıs')
 
+# iki veya daha cok parcaya bolunen ilceler
 df11 = ilce_updater(df11,df15,'Van',['İpekyolu','Tuşba'])
 df11 = ilce_updater(df11,df15,'Balıkesir',['Altıeylül','Karesi'])
 df11 = ilce_updater(df11,df15,'Hatay',['Antakya', 'Arsuz', 'Defne', 'Payas'])
@@ -114,6 +113,7 @@ df11 = ilce_updater(df11,df15,'Şanlıurfa',['Eyyübiye','Haliliye', 'Karaköpr�
 df11 = ilce_updater(df11,df15,'Zonguldak',['Zonguldak','Kilimli', 'Kozlu'])
 df11 = ilce_updater(df11,df15,'Fethiye',['Fethiye','Seydikemer'])
 
+# 2011'de olup 2015'te olmayip (veya tersi) analize dahil edilmeyen ilceler
 df11[~df11['ilce'].isin(df15['ilce'])]['ilce'].unique() #'Kargı'
 df15[~df15['ilce'].isin(df11['ilce'])]['ilce'].unique() #['Bahçelievler', 'Fatih', 'Malatya']
 
@@ -126,6 +126,12 @@ parties = ['AKP', 'CHP', 'HDP', 'MHP', 'OTHERS']
 #2011 vote shares (according tp dfilce dataset)
 for p in parties:
     print((dfilce[p+'11']*dfilce['VOTES11']).sum() / dfilce['VOTES11'].sum())
+#2015 vote shares (according tp dfilce dataset)
+for p in parties:
+    print((dfilce[p+'V']).sum() / dfilce[[p+'V' for p in parties]].sum().sum())
+
+for p in parties:
+    print((df15[p+'V']).sum() / df15[[p+'V' for p in parties]].sum().sum())
 
 def ilce_updater(df11,df15,oldilce,new_ilces):
     pop15 = 0
