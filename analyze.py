@@ -77,10 +77,17 @@ plaka = pd.read_table('data/plaka.tsv',header=None,names=['il','kod'])
 # df15[~df15['il'].isin(plaka['il'])]['il'].unique()
 plaka = plaka.replace('İçel','Mersin')
 plaka = plaka.replace('Afyon','Afyonkarahisar')
-kodil = dict(zip(plaka.kod, plaka.il))
+kodil = dict(zip(plaka.kod, plaka.il)) #for handiness
+ilkod = dict(zip(plaka.il, plaka.kod)) #for handiness
 df15 = df15.replace('K.Maraş','Kahramanmaraş')
 df15 = df15.merge(plaka)
 df11 = df11.replace('AK Parti','AKP')
+df11 = df11.replace('BĞMZ','HDP')
+df11 = df11.rename(columns={'il':'kod'})
+
+# fix non-matching ilce names
+df11[~df11['ilce'].isin(df15['ilce'])]['ilce'].unique()
+df15[~df15['ilce'].isin(df11['ilce'])]['ilce'].unique()
 df11 = df11.apply(lambda x: x.replace('Merkez',kodil[x.il]),axis=1)
 df11 = df11.replace('Didim (Yenihisar)','Didim')
 df11 = df11.replace('Devrakani','Devrekani')
@@ -92,15 +99,47 @@ df11 = df11.replace('Trabzon','Ortahisar')
 df11 = df11.replace('Akköy','Pamukkale')
 df11 = df11.replace('Ordu','Altınordu')
 df11 = df11.replace('Bahşılı','Bahşili')
+df11 = df11.replace('Mihalıçcık','Mihalıççık')
+df11 = df11.replace('Samandağı','Samandağ')
+df11 = df11.replace('Muğla','Menteşe')
 df15 = df15.replace('19.May','19 Mayıs')
-df11[~df11['ilce'].isin(df15['ilce'])]['ilce'].unique()
-df15[~df15['ilce'].isin(df11['ilce'])]['ilce'].unique()
-df11 = df11.rename(columns={'il':'kod'})
-df11 = df11.replace('BĞMZ','HDP')
+
+df11 = ilce_updater(df11,df15,'Van',['İpekyolu','Tuşba'])
+df11 = ilce_updater(df11,df15,'Balıkesir',['Altıeylül','Karesi'])
+df11 = ilce_updater(df11,df15,'Hatay',['Antakya', 'Arsuz', 'Defne', 'Payas'])
+df11 = ilce_updater(df11,df15,'Kahramanmaraş',['Dulkadiroğlu', 'Onikişubat'])
+df11 = ilce_updater(df11,df15,'Manisa',['Şehzadeler', 'Yunusemre'])
+df11 = ilce_updater(df11,df15,'Tekirdağ',['Ergene', 'Kapaklı', 'Süleymanpaşa'])
+df11 = ilce_updater(df11,df15,'Şanlıurfa',['Eyyübiye','Haliliye', 'Karaköprü'])
+df11 = ilce_updater(df11,df15,'Zonguldak',['Zonguldak','Kilimli', 'Kozlu'])
+df11 = ilce_updater(df11,df15,'Fethiye',['Fethiye','Seydikemer'])
+
+df11[~df11['ilce'].isin(df15['ilce'])]['ilce'].unique() #'Kargı'
+df15[~df15['ilce'].isin(df11['ilce'])]['ilce'].unique() #['Bahçelievler', 'Fatih', 'Malatya']
+
 grouped = df11.groupby(by=['kod','ilce'])
 df11 = grouped.apply(getVoteShares).reset_index()
 dfilce = df11.merge(df15, on=['kod','ilce'],suffixes=('11','15'))
 dfilce.to_csv('data/TR_11_15_ilce.csv',index=False)
+
+parties = ['AKP', 'CHP', 'HDP', 'MHP', 'OTHERS']
+#2011 vote shares (according tp dfilce dataset)
+for p in parties:
+    print((dfilce[p+'11']*dfilce['VOTES11']).sum() / dfilce['VOTES11'].sum())
+
+def ilce_updater(df11,df15,oldilce,new_ilces):
+    pop15 = 0
+    for i in new_ilces:
+        pop15 += df15[df15['ilce']==i][[p+'V' for p in parties]].sum().sum()
+    for i in new_ilces:
+        pop11 = df11[df11['ilce']==oldilce]['VOTES11'].iloc[0]
+        weight = df15[df15['ilce']==i][[p+'V' for p in parties]].sum().sum() / pop15 
+        z = df11[df11['ilce']==oldilce].iloc[0]
+        z['ilce'] = i
+        z['VOTES11']=int(pop11*weight)
+        df11 = df11.append(z,ignore_index=True)
+    df11 = df11.drop(df11[df11['ilce']==oldilce].first_valid_index())
+    return df11
 
 
 def getVoteShares(g):

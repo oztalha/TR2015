@@ -34,9 +34,9 @@ for i in range(1,int(len(data)/7)):
     except Exception as e:
         print('[ERROR]', e)
     df.to_csv('data/TR2015.csv',index=False,encoding='utf-8')
-# Manually added BOM using Notepad++ to make MS Excel happy
-    
-#ilce secim sonuclari KIMONO ile toplandi
+
+
+# ilce secim sonuclari http://secim.haberler.com sitesinden toplandi
 urls = pd.read_csv('data/ilceler_link.csv',
                    usecols=["ilceler.href"],squeeze=True).tolist()
 df = pd.DataFrame(columns=('il','ilce', 'AKP', 'CHP','MHP','HDP','OTHERS',
@@ -84,53 +84,4 @@ for url in urls:
 
     df.to_csv('data/TR2015_ILCELER.csv',index=False,encoding='utf-8')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import json
-import urllib.request
-
-results = []
-
-count = 0
-while True:
-    kimono = json.loads(urllib.request.urlopen("https://www.kimonolabs.com/" \
-    "api/58tyw3wm?apikey=VPXUp7hOkUYDIL3wC8GVMHFQcOW3O7HC&" \
-    "&kimstats=1&kimoffset="+str(count)).read().decode("utf-8"))
-    count += kimono['count']
-    try:
-        results.extend(kimono.get('results').get('collection1'))
-    except Exception as e:
-        print(count,e) #count: 107500
-        break
-
-katilim = kimono.get('results').get('collection2')
-while True:
-    kimono = json.loads(urllib.request.urlopen("https://www.kimonolabs.com/" \
-    "api/58tyw3wm?apikey=VPXUp7hOkUYDIL3wC8GVMHFQcOW3O7HC&" \
-    "&kimstats=1&kimoffset="+str(count)).read().decode("utf-8"))
-    count += kimono['count']
-    try:
-        katilim.extend(kimono.get('results').get('collection2'))
-    except:
-        print(count,e)
-        break
-
-df = pd.DataFrame(columns=('il','ilce', 'AKP', 'CHP','MHP','HDP','OTHERS'))
-for r in results:
     
