@@ -53,17 +53,37 @@ for p in parties:
 #plotly graphs
 import plotly.plotly as py
 from plotly.graph_objs import *
+
+iller = pd.read_csv('data/iller.csv',usecols=['il','bolge'])
+iller['il'] = iller['il'].str.replace(r'\s*\(\d*\)','')
+
+iller = iller.rename(columns={'il':'PROVINCE'})
+iller['PROVINCE'] = iller['PROVINCE'].apply(lambda x: unidecode(x).upper())
+iller['PROVINCE'] = iller['PROVINCE'].str.replace(r' ','')
+iller = iller.replace('ICEL','MERSIN')
+df = iller.merge(df)
+
+# add colors
+from palettable.colorbrewer.qualitative import Dark2_7 as colmap
+colors = dict(zip(df['bolge'].unique().tolist(),colmap.hex_colors))
+
 for p in parties:
     p11 = p + 'P11'
-    lim = max(df[p].max(),df[p11].max()) + 5
-    data = Data([Scatter(x=df[p11],y=df[p],mode='markers',
-                         text=df['PROVINCE'])])
+    lim = max(df[p].max(),df[p11].max())
+    #each region is a trace, otherwise they do not show up in the legend
+    traces = [Scatter(x=df[df.bolge==b][p11],y=df[df.bolge==b][p],
+                      mode='markers', text=df[df.bolge==b]['PROVINCE'], name=b,
+                      marker=Marker(color=v)) for b,v in colors.items()]
+    traces.append(Scatter(x=[0,lim],y=[0,lim],mode='lines', name='y=x',
+                        line=Line(color='grey',dash='dash')))
+    data = Data(traces)
     layout = Layout(title=p+' 2015 vs 2011 Vote Shares',
                     autosize=True,
-                    xaxis=XAxis(title=p+" 2011 Vote Shares"),
-                    yaxis=YAxis(title=p+" 2015 Vote Shares"))
+                    xaxis=XAxis(title=p+" 2011 Vote Shares",zeroline=False),
+                    yaxis=YAxis(title=p+" 2015 Vote Shares",zeroline=False),
+                    legend=Legend(x=.01,y=1))
     fig = Figure(data=data,layout=layout)
-    py.iplot(fig,fileopt='new')
+    url = py.plot(fig,filename= p+' 2015 vs 2011 Vote Shares')
     
     
 
